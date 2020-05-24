@@ -1,0 +1,32 @@
+* {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    list-style: none;
+    font-family: "Krub", sans-serif;
+}
+
+.content-wrapper {
+    width: 100%;
+    margin: 310px 0;
+}
+
+.title {
+    letter-spacing: 2px;
+    
+}
+
+.subtitle {
+    color: grey;
+    letter-spacing: 1px;
+    margin-top: 16px;
+}
+
+.text-center {
+    text-align: center;
+    color: teal;
+}
+
+.color {
+    text-decoration-color: teal;
+}

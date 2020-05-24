@@ -1,0 +1,47 @@
+.navbar {
+    min-height: 55px;
+    background-color: teal;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+}
+
+.navbar .title {
+    flex-grow: 1;
+}
+
+.navbar .title a {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    padding: 28px 0;
+}
+
+.navbar .nav {
+    display: flex;
+}
+
+.navbar .nav li {
+    display: inline-flex;
+    position: relative;
+}
+
+.navbar .nav a {
+    color: white;
+    padding: 28px 16px;
+}
+
+.navbar .nav li::before {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    content: "\00a0";
+    position: absolute;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.navbar .nav li:hover::before {
+    border-bottom: 5px solid white;
+}
