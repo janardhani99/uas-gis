@@ -34,6 +34,36 @@
                 <div class="form-body">
                     <div class="form-control">
                         <div class="form-label">
+                            <label for="level">Level</label>
+                        </div>
+                        <input type="number" class="input" name="level" value="{{ $covids->level }}" />
+                    </div>
+                    <div class="form-control">
+                        <div class="form-label">
+                            <label for="ppln">PP-LN</label>
+                        </div>
+                        <input type="number" class="input" name="ppln" value="{{ $covids->ppln }}" />
+                    </div>
+                    <div class="form-control">
+                        <div class="form-label">
+                            <label for="ppdn">PP-DN</label>
+                        </div>
+                        <input type="number" class="input" name="ppdn" value="{{ $covids->ppdn }}" />
+                    </div>
+                    <div class="form-control">
+                        <div class="form-label">
+                            <label for="tl">TL</label>
+                        </div>
+                        <input type="number" class="input" name="tl" value="{{ $covids->tl }}"/>
+                    </div>
+                    <div class="form-control">
+                        <div class="form-label">
+                            <label for="lainnya">Lainnya</label>
+                        </div>
+                        <input type="number" class="input" name="lainnya" value="{{ $covids->lainnya }}" />
+                    </div>
+                    <div class="form-control">
+                        <div class="form-label">
                             <label for="rawat">Dalam Perawatan</label>
                         </div>
                         <input type="number" class="input" name="rawat" value="{{ $covids->rawat }}" />
