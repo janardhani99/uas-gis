@@ -29,20 +29,24 @@
 .table {
     width: 100%;
     padding: 16px;
-    border-spacing: 0;
+    border-spacing: 1;
     cursor: default;
+    border-collapse: collapse;
+    border: 1px solid #f2f5f7;
 }
 
 .table thead th {
-    border-bottom: 1px solid #ddd;
+    border-bottom: 2px solid #ddd;
     padding: 16px 0;
     text-align: center;
+     border: 1px solid #ddd;
 }
 
 .table tbody td {
     text-align: center;
     padding: 16px 0;
     border-bottom: 1px solid #ddd;
+
 }
 
 .table tbody tr:nth-child(even):hover {
@@ -50,7 +54,7 @@
 }
 
 .table tbody tr:last-child td {
-    border: none;
+    border: 1px solid #ddd;
 }
 
 .table tbody button {

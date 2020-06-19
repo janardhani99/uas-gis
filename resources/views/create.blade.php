@@ -38,9 +38,61 @@
                     </div>
                     <div class="form-control">
                         <div class="form-label">
+                            <label for="exampleFormControlSelect1">Kecamatan</label>
+                        </div>
+                        <select name="kecamatan" class="select">
+                            <option value="">Pilih</option>
+                            @foreach ($kecamatan as $kec)
+                                <option value="{{$kec->id_kecamatan}}">{{$kec->kecamatan}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <div class="form-label">
+                            <label for="exampleFormControlSelect1">Kelurahan</label>
+                        </div>
+                        <select name="kelurahan" class="select">
+                            <option value="">Pilih</option>
+                            @foreach ($kelurahan as $kel)
+                                <option value="{{$kel->id_kelurahan}}">{{$kel->kelurahan}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <div class="form-label">
                             <label for="exampleFormControlInput1">Tanggal</label>
                         </div>
                         <input type="date" class="form-control" name="tanggal" id="tanggal" />
+                    </div>
+                    <div class="form-control">
+                        <div class="form-label">
+                            <label for="level">Level</label>
+                        </div>
+                        <input type="number" class="input" name="level" id="level" />
+                    </div>
+                    <div class="form-control">
+                        <div class="form-label">
+                            <label for="pp-ln">PP-LN</label>
+                        </div>
+                        <input type="number" class="input" name="ppln" id="ppln" />
+                    </div>
+                    <div class="form-control">
+                        <div class="form-label">
+                            <label for="pp-dn">PP-DN</label>
+                        </div>
+                        <input type="number" class="input" name="ppdn" id="ppdn" />
+                    </div>
+                    <div class="form-control">
+                        <div class="form-label">
+                            <label for="tl">TL</label>
+                        </div>
+                        <input type="number" class="input" name="tl" id="tl" />
+                    </div>
+                    <div class="form-control">
+                        <div class="form-label">
+                            <label for="lainnya">Lainnya</label>
+                        </div>
+                        <input type="number" class="input" name="lainnya" id="lainnya" />
                     </div>
                     <div class="form-control">
                         <div class="form-label">
@@ -71,24 +123,44 @@
         <div class="table-wrapper">
             <br/>
         <h2 align="center"> Data Covid-19 di Bali</h2>
+        </br>
 
             <table class="table">
                 <thead>
                     <tr>
-                        <th>No</th>
-                        <th>Kabupaten</th>
+                        <th rowspan="2">No</th>
+                        <th rowspan="2">Kabupaten</th>
+                        <th rowspan="2">Kecamatan</th>
+                        <th rowspan="2">Kelurahan</th>
+                        <th rowspan="2">Level</th>
+                        <th colspan="5">Penyebaran</th>
+                        <th colspan="5">Kondisi</th>
+                    </tr>
+                    <tr>
+                        <th>PP-LN</th>
+                        <th>PP-DN</th>
+                        <th>TL</th>
+                        <th>Lainnya</th>
                         <th>Positif</th>
                         <th>Dirawat</th>
                         <th>Sembuh</th>
                         <th>Meninggal</th>
                         <th>Detail</th>
+                    </tr>
                 </thead>
 
                 <tbody>
                     @foreach ($test as $covid)
                         <tr>
-                            <th scope="row">{{ $loop->iteration }}</th>
+                            <td scope="row">{{ $loop->iteration }}</td>
                             <td>{{ $covid->kabupaten }}</td>
+                            <td>{{ $covid->kecamatan }}</td>
+                            <td>{{ $covid->kelurahan }}</td>
+                            <td>{{ $covid->level }}</td>
+                            <td>{{ $covid->ppln }}</td>
+                            <td>{{ $covid->ppdn }}</td>
+                            <td>{{ $covid->tl }}</td>
+                            <td>{{ $covid->lainnya }}</td>
                             <td>{{ $covid->positif }}</td>
                             <td>{{ $covid->rawat }}</td>
                             <td>{{ $covid->sembuh }}</td>

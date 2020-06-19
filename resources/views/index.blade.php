@@ -76,7 +76,7 @@
 
             <div class="maps" id="map"></div>
 
-            <div class="card-footer" style="background: white">
+            <!-- <div class="card-footer" style="background: white">
               <div class="row">
                 <div class="col-6">
                   Color Start
@@ -92,7 +92,7 @@
                   <button class="btn btn-primary form-control" id="btnGenerateColor">Generate Color</button>
                 </div>
               </div>
-            </div>
+            </div> -->
         </div>
         <br/>
         
@@ -104,8 +104,15 @@
                     <tr>
                         <th>No</th>
                         <th>Kabupaten</th>
+                        <th>Kecamatan</th>
+                        <th>Kelurahan</th>
+                        <th>Level</th>
+                        <th>PP-LN</th>
+                        <th>PP-DN</th>
+                        <th>TL</th>
+                        <th>Lainnya</th>
                         <th>Positif</th>
-                        <th>Dalam Perawatan</th>
+                        <th>Dirawat</th>
                         <th>Sembuh</th>
                         <th>Meninggal</th>
                     </tr>
@@ -115,6 +122,13 @@
                     <tr>
                         <th scope="row">{{ $loop->iteration }}</th>
                         <td>{{ $covid->kabupaten }}</td>
+                        <td>{{ $covid->kecamatan }}</td>
+                        <td>{{ $covid->kelurahan }}</td>
+                        <td>{{ $covid->level }}</td>
+                        <td>{{ $covid->ppln }}</td>
+                        <td>{{ $covid->ppdn }}</td>
+                        <td>{{ $covid->tl }}</td>
+                        <td>{{ $covid->lainnya }}</td>
                         <td>{{ $covid->positif }}</td>
                         <td>{{ $covid->rawat }}</td>
                         <td>{{ $covid->sembuh }}</td>
@@ -133,63 +147,22 @@
             $('#example').DataTable();
         } );
     </script>
-
     <script>
         $(document).ready(function () {
             var dataMap=null;
             var dataPos=null;
-            var colorMap=[
-                "e5000d",
-                "e71925",
-                "ea333d",
-                "ec4c55",
-                "ef666d",
-                "f27f68",
-                "f4999e",
-                "f7b2b6",
-                "f9ccce"
-            ];
 
             var tanggal = $('#tanggalSearch').val();
             console.log(tanggal);
             $.ajax({
                 async:false,
-                url:'data',
+                url:'getData',
                 type:'get',
                 dataType:'json',
                 covids:{date: tanggal},
                 success: function(response){
                     dataMap = response;
                 }
-            });
-            console.log(dataMap);
-            
-            $.ajax({
-                async:false,
-                url:'positif',
-                type:'get',
-                dataType:'json',
-                covids:{date: tanggal},
-                success: function(response){
-                    dataPos = response;
-                }
-            });
-            console.log(dataPos);
-
-            $('#btnGenerateColor').on('click',function(e){
-                var colorStart = $('#colorStart').val();
-                var colorEnd = $('#colorEnd').val();
-                $.ajax({
-                    async:false,
-                    url:'/create-pallete',
-                    type:'get',
-                    dataType:'json',
-                    covids:{start: colorStart, end:colorEnd},
-                    success: function(response){
-                        colorMap = response;
-                        setMapColor();
-                    }
-                });
             });
 
             var map = L.map('map');
@@ -202,169 +175,247 @@
             });
 
             OpenTopoMap.addTo(map);
-            setMapColor();
-            // define variables
-            var lastLayer;
             var defStyle = {opacity:'1',color:'#000000',fillOpacity:'0',fillColor:'#CCCCCC'};
-            var selStyle = {color:'#0000FF',opacity:'1',fillColor:'#00FF00',fillOpacity:'1'};
-
+            setMapColor();
+    
             function setMapColor(){
                 var markerIcon = L.icon({
-                    iconUrl: '/mar.png',
+                    iconUrl: 'mar.png',
                     iconSize: [40, 40],
-                });
-
-                var BADUNG,BULELENG,BANGLI,DENPASAR,GIANYAR,JEMBRANA,KARANGASEM,KLUNGKUNG,TABANAN;
-                dataPos.forEach(function(value,index){
-                    var colorKab = dataPos[index].kabupaten.toUpperCase();
-                    console.log(colorKab);
-                    if(colorKab == "BADUNG"){
-                      BADUNG = {opacity:'1',color:'#000',fillOpacity:'1',fillColor: '#'+colorMap[index]};
-                    }else if(colorKab=="BANGLI"){
-                      BANGLI = {opacity:'1',color:'#000',fillOpacity:'1',fillColor: '#'+colorMap[index]};
-                    } else if(colorKab=="BULELENG"){
-                      BULELENG = {opacity:'1',color:'#000',fillOpacity:'1',fillColor: '#'+colorMap[index]};
-                    }else if(colorKab=="DENPASAR"){
-                      DENPASAR = {opacity:'1',color:'#000',fillOpacity:'1',fillColor: '#'+colorMap[index]};
-                    }else if(colorKab=="GIANYAR"){
-                      GIANYAR = {opacity:'1',color:'#000',fillOpacity:'1',fillColor: '#'+colorMap[index]};
-                    }else if(colorKab =="JEMBRANA"){
-                      JEMBRANA = {opacity:'1',color:'#000',fillOpacity:'1',fillColor: '#'+colorMap[index]};
-                    }else if(colorKab=="KARANGASEM"){
-                      KARANGASEM = {opacity:'1',color:'#000',fillOpacity:'1',fillColor: '#'+colorMap[index]};
-                    }else if(colorKab=="KLUNGKUNG"){
-                      KLUNGKUNG = {opacity:'1',color:'#000',fillOpacity:'1',fillColor: '#'+colorMap[index]};
-                    }else if(colorKab =="TABANAN"){
-                      TABANAN = {opacity:'1',color:'#000',fillOpacity:'1',fillColor: '#'+colorMap[index]};
-                    }
-
                 });
 
                 // Instantiate KMZ parser (async)
                 var kmzParser = new L.KMZParser({
-                    onKMZLoaded: function (layer, name) {
-                        control.addOverlay(layer, name);
+                    onKMZLoaded: function (kmz_layer, name) {
+                        control.addOverlay(kmz_layer,name);
                         var markers = L.markerClusterGroup();
-                        var layers = layer.getLayers()[0].getLayers();
-
+                        var layers = kmz_layer.getLayers()[0].getLayers();
+                        console.log(layers[0]);
                         // fetching sub layer
-                        layers.forEach(function(layer, index){
-
+                        layers.forEach(function(layer, index){          
                             var kab  = layer.feature.properties.NAME_2;
-                            kab = kab.toUpperCase();
-                            var prov = layer.feature.properties.NAME_1;
+                            var kec =  layer.feature.properties.NAME_3;
+                            var kel = layer.feature.properties.NAME_4;
+                            var covids;
 
+                            var STYLE = {opacity:'1',color:'#000',fillOpacity:'1'};
+                            var HIJAU_MUDA = {opacity:'1',color:'#000',fillOpacity:'1', fillColor:'#81F781'};
+                            var HIJAU_TUA = {opacity:'1',color:'#000',fillOpacity:'1', fillColor:'#088A08'};
+                            var KUNING = {opacity:'1',color:'#000',fillOpacity:'1', fillColor:'#FFFF00'};
+                            var MERAH_MUDA = {opacity:'1',color:'#000',fillOpacity:'1', fillColor:'#F78181'};
+                            var MERAH_TUA = {opacity:'1',color:'#000',fillOpacity:'1', fillColor:'#B40404'};
+          
+          //
                             if(!Array.isArray(dataMap) || !dataMap.length == 0 ){
-                            // set sub layer default style positif covid
-                            if(kab == 'BADUNG'){
-                              layer.setStyle(BADUNG);
-                            }else if(kab == 'BANGLI'){
-                              layer.setStyle(BANGLI);
-                            }else if(kab == 'BULELENG'){
-                              layer.setStyle(BULELENG);
-                            }else if(kab == 'DENPASAR'){
-                              layer.setStyle(DENPASAR);
-                            }else if(kab == 'GIANYAR'){
-                              layer.setStyle(GIANYAR);
-                            }else if(kab == 'JEMBRANA'){
-                              layer.setStyle(JEMBRANA);
-                            }else if(kab == 'KARANGASEM'){
-                              layer.setStyle(KARANGASEM);
-                            }else if(kab == 'KLUNGKUNG'){
-                              layer.setStyle(KLUNGKUNG);
-                            }else if(kab == 'TABANAN'){
-                              layer.setStyle(TABANAN);
-                            } 
+                                var searchResult = dataMap.filter(function(it){
+                                    return it.kecamatan.replace(/\s/g,'').toLowerCase() === kec.replace(/\s/g,'').toLowerCase() &&
+                                    it.kelurahan.replace(/\s/g,'').toLowerCase() === kel.replace(/\s/g,'').toLowerCase();
+                                });
 
-                            // peparing data format
-                            var covids = '<table width="300">';
-                            covids +='  <tr>';
-                            covids +='    <th colspan="2">Keterangan</th>';
-                            covids +='  </tr>';
+                                if(!Array.isArray(searchResult) || !searchResult.length ==0){
+                                    var item = searchResult[0];
+                                    if(item.positif == 0 ){
+                                        layer.setStyle(HIJAU_MUDA);  
+                                    }else if(item.rawat == 0 && item.positif>0 && item.sembuh >= 0 && item.meninggal >=0){
+                                        layer.setStyle(HIJAU_TUA);
+                                    }else if(item.ppln ==1 && item.rawat == 1 && item.positif == 1 && item.tl==0 || item.ppdn ==1 && item.rawat == 1&& item.positif == 1 && item.tl==0){
+                                        layer.setStyle(KUNING);
+                                    }else if((item.ppln >1 && item.rawat <= item.ppln && item.sembuh <= item.ppln && item.tl == 0) || (item.ppdn >1 && item.rawat<= item.ppdn && item.sembuh <= item.ppdn && item.tl == 0)  ){
+                                        layer.setStyle(MERAH_MUDA);
+                                    }else{
+                                        layer.setStyle(MERAH_TUA);
+                                    }
+
+                                // set sub layer default style positif covid
+                                // if(kab == 'BADUNG'){
+                                //     layer.setStyle(BADUNG);
+                                // }else if(kab == 'BANGLI'){
+                                //     layer.setStyle(BANGLI);
+                                // }else if(kab == 'BULELENG'){
+                                //     layer.setStyle(BULELENG);
+                                // }else if(kab == 'DENPASAR'){
+                                //     layer.setStyle(DENPASAR);
+                                // }else if(kab == 'GIANYAR'){
+                                //     layer.setStyle(GIANYAR);
+                                // }else if(kab == 'JEMBRANA'){
+                                //     layer.setStyle(JEMBRANA);
+                                // }else if(kab == 'KARANGASEM'){
+                                //     layer.setStyle(KARANGASEM);
+                                // }else if(kab == 'KLUNGKUNG'){
+                                //     layer.setStyle(KLUNGKUNG);
+                                // }else if(kab == 'TABANAN'){
+                                //     layer.setStyle(TABANAN);
+                                // } 
 
 
-                            covids +='  <tr>';
-                            covids +='    <td>Kabupaten</td>';
-                            covids +='    <td>: '+kab+'</td>';
-                            covids +='  </tr>';              
+                                // peparing data format
+                                covids = '<table width="300">';
+                                covids +='  <tr>';
+                                covids +='    <th colspan="2">Keterangan</th>';
+                                covids +='  </tr>';
+              
+              
+                                covids +='  <tr>';
+                                covids +='    <td>Kabupaten</td>';
+                                covids +='    <td>: '+kab+'</td>';
+                                covids +='  </tr>';
+
+
+                                covids +='  <tr>';
+                                covids +='    <td>Kecamatan</td>';
+                                covids +='    <td>: '+kec+'</td>';
+                                covids +='  </tr>';
+
+
+                                covids +='  <tr>';
+                                covids +='    <td>Kelurahan</td>';
+                                covids +='    <td>: '+kel+'</td>';
+                                covids +='  </tr>'; 
+
+
+                                covids +='  <tr>';
+                                covids +='    <td>Level</td>';
+                                covids +='    <td>: '+item.level+'</td>';
+                                covids +='  </tr>';             
 
               
-                            // covids +='  <tr style="color:red">';
-                            // covids +='    <td>Positif</td>';
-                            // covids +='    <td>: '+dataMap[index].positif+'</td>';
-                            // covids +='  </tr>';
+                                covids +='  <tr style="color:red">';
+                                covids +='    <td>Positif</td>';
+                                covids +='    <td>: '+item.positif+'</td>';
+                                covids +='  </tr>';
+              
 
+                                covids +='  <tr style="color:green">';
+                                covids +='    <td>Sembuh</td>';
+                                covids +='    <td>: '+item.sembuh+'</td>';
+                                covids +='  </tr>'; 
 
-                            // covids +='  <tr style="color:blue">';
-                            // covids +='    <td>Dalam Perawatan</td>';
-                            // covids +='    <td>: '+dataMap[index].rawat+'</td>';
-                            // covids +='  </tr>';
-                            
+                                covids +='  <tr style="color:black">';
+                                covids +='    <td>Meninggal</td>';
+                                covids +='    <td>: '+item.meninggal+'</td>';
+                                covids +='  </tr>';
 
-                            // covids +='  <tr style="color:green">';
-                            // covids +='    <td>Sembuh</td>';
-                            // covids +='    <td>: '+dataMap[index].sembuh+'</td>';
-                            // covids +='  </tr>'; 
-
-
-                            // covids +='  <tr style="color:black">';
-                            // covids +='    <td>Meninggal</td>';
-                            // covids +='    <td>: '+dataMap[index].meninggal+'</td>';
-                            // covids +='  </tr>';
-
-          
-                            covids +='</table>';
+                  
+                                covids +='  <tr style="color:blue">';
+                                covids +='    <td>Dalam Perawatan</td>';
+                                covids +='    <td>: '+item.rawat+'</td>';
+                                covids +='  </tr>';               
+              
+              
+                            //     covids +='</table>';
     
-                            if(kab == 'BANGLI'){
-                              markers.addLayer( 
-                                L.marker([-8.254251, 115.366936] ,{
-                                  icon: markerIcon
-                                }).bindPopup(covids).addTo(map)
-                              );
-                            }
-                            else if(kab == 'GIANYAR'){
-                              markers.addLayer( 
-                                L.marker([-8.422739, 115.255700] ,{
-                                  icon: markerIcon
-                                }).bindPopup(covids).addTo(map)
-                              );
+                            //     if(kab == 'BANGLI'){
+                            //         markers.addLayer( 
+                            //             L.marker([-8.254251, 115.366936] ,{
+                            //                 icon: markerIcon
+                            //             }).bindPopup(covids).addTo(map)
+                            //         );
+                            //     }
+                            //     else if(kab == 'GIANYAR'){
+                            //         markers.addLayer( 
+                            //             L.marker([-8.422739, 115.255700] ,{
+                            //                 icon: markerIcon
+                            //             }).bindPopup(covids).addTo(map)
+                            //         );
 
-                            }else if(kab == 'KLUNGKUNG'){
-                              markers.addLayer( 
-                                L.marker([-8.487338, 115.380029] ,{
-                                  icon: markerIcon
-                                }).bindPopup(covids).addTo(map)
-                            );
+                            //     }else if(kab == 'KLUNGKUNG'){
+                            //         markers.addLayer( 
+                            //             L.marker([-8.487338, 115.380029] ,{
+                            //                 icon: markerIcon
+                            //             }).bindPopup(covids).addTo(map)
+                            //         );
+
+                            //     }else{
+                            //         markers.addLayer( 
+                            //             L.marker(layer.getBounds().getCenter(),{
+                            //                 icon: markerIcon
+                            //             }).bindPopup(covids).addTo(map)
+                            //         );
+                            //     }
+
+                            // }else{
+                            //     var covids = "Tidak ada Data pada tanggal tersebut"
+                            //     layer.setStyle(defStyle);
+                            // }
+
+                                }else{
+                                    console.log(kel.replace(/\s/g,'').toLowerCase());
+                                    console.log(kec.replace(/\s/g,'').toLowerCase());
+                                    covids = '<table width="300">';
+                                    covids +='  <tr>';
+                                    covids +='    <th colspan="2">Keterangan</th>';
+                                    covids +='  </tr>';
+                                    
+                                    covids +='  <tr>';
+                                    covids +='    <td>Kabupaten</td>';
+                                    covids +='    <td>: '+kab+'</td>';
+                                    covids +='  </tr>';              
+                      
+                                    covids +='  <tr style="color:red">';
+                                    covids +='    <td>Kecamatan</td>';
+                                    covids +='    <td>: '+kec+'</td>';
+                                    covids +='  </tr>';
+
+                                    covids +='  <tr style="color:red">';
+                                    covids +='    <td>Kelurahan</td>';
+                                    covids +='    <td>: '+kel+'</td>';
+                                    covids +='  </tr>';
+
+                                    covids +='  <tr style="color:red">';
+                                    covids +='    <td>Tidak ada data pada tanggal ini</td>';
+                                    covids +='  </tr>';
+                                }
 
                             }else{
-                              markers.addLayer( 
-                                L.marker(layer.getBounds().getCenter(),{
-                                  icon: markerIcon
-                                }).bindPopup(covids).addTo(map)
-                              );
+                                covids = '<table width="300">';
+                                covids +='  <tr>';
+                                covids +='    <th colspan="2">Keterangan</th>';
+                                covids +='  </tr>';
+                                
+                                covids +='  <tr>';
+                                covids +='    <td>Kabupaten</td>';
+                                covids +='    <td>: '+kab+'</td>';
+                                covids +='  </tr>';              
+                  
+                                covids +='  <tr style="color:black">';
+                                covids +='    <td>Kecamatan</td>';
+                                covids +='    <td>: '+kec+'</td>';
+                                covids +='  </tr>';
+
+                                covids +='  <tr style="color:black">';
+                                covids +='    <td>Kelurahan</td>';
+                                covids +='    <td>: '+kel+'</td>';
+                                covids +='  </tr>';
+
+                                covids +='  <tr style="color:black">';
+                                covids +='    <td>Tidak ada data</td>';
+                                covids +='  </tr>';
+                            layer.setStyle(defStyle);
                             }
 
-                            }else{
-                              var covids = "Tidak ada Data pada tanggal tersebut"
-                              layer.setStyle(defStyle);
-                            }
                             layer.bindPopup(covids);
+                            markers.addLayer( 
+                                L.marker(layer.getBounds().getCenter(),{
+                                    icon: markerIcon
+                                }).bindPopup(covids)
+                            );
                         });
+                        
                         map.addLayer(markers);
-                        layer.addTo(map);
-                        }
-                    });
+                        kmz_layer.addTo(map);
+                    }
+                });
   
-    // Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
-                    kmzParser.load('kabupaten-bali.kmz');
-    // kmzParser.load('https://raruto.github.io/leaflet-kmz/examples/globe.kmz');
+                // Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
+                kmzParser.load('bali-kelurahan.kmz');
+                // kmzParser.load('https://raruto.github.io/leaflet-kmz/examples/globe.kmz');
 
-                    var control = L.control.layers(null, null, {
-                        collapsed: false
-                    }).addTo(map);
-                    $('.leaflet-control-layers').hide();
+                var control = L.control.layers(null, null, {
+                    collapsed: false
+                }).addTo(map);
+                $('.leaflet-control-layers').hide();
             }
         });
-</script>
+    </script>
 </body>
 </html>

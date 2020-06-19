@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use DB;
 use App\Covid;
 use App\Kabupaten;
+use App\Kecamatan;
+use App\Kelurahan;
 // use Carbon\Carbon as Carbon;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
@@ -14,18 +16,20 @@ class IndexController extends Controller
     {
         $tanggalSekarang = CARBON::now()->locale('id')->isoFormat('LL');
         $dateNow = Carbon::now()->format('Y-m-d');
-        $covids = Covid::select('tb_input.id_input','tb_kabupaten.id_kabupaten','kabupaten','positif','rawat','sembuh','meninggal')
-                ->join('tb_kabupaten','tb_input.id_kabupaten','=','tb_kabupaten.id_kabupaten')
-                ->where('tanggal', $dateNow)->orderBy('positif','desc')
+        $covids = Covid::select('tb_input.id_input','tb_kabupaten.id_kabupaten','tb_kecamatan.id_kecamatan','tb_kelurahan.id_kelurahan','kabupaten','kecamatan','kelurahan','positif','rawat','sembuh','meninggal','ppln','ppdn','tl','lainnya','level')
+                ->join('tb_kelurahan','tb_input.id_kelurahan','=','tb_kelurahan.id_kelurahan')
+                ->join('tb_kecamatan','tb_kelurahan.id_kecamatan','=','tb_kecamatan.id_kecamatan')
+                ->join('tb_kabupaten','tb_kecamatan.id_kabupaten','=','tb_kabupaten.id_kabupaten')
+                ->where('tanggal', $dateNow)->orderBy('id_kelurahan','asc')
                 ->get();
-                $positif = Covid::select(DB::raw('COALESCE(SUM(positif),0) as positif'))->where('tanggal',$dateNow)->get();
-                $rawat = Covid::select(DB::raw('COALESCE(SUM(rawat),0) as rawat'))->where('tanggal',$dateNow)->get();
-                $sembuh = Covid::select(DB::raw('COALESCE(SUM(sembuh),0) as sembuh'))->where('tanggal',$dateNow)->get();
-                $meninggal = Covid::select(DB::raw('COALESCE(SUM(meninggal),0) as meninggal'))->where('tanggal',$dateNow)->get();
+        $positif = Covid::select(DB::raw('COALESCE(SUM(positif),0) as positif'))->where('tanggal',$dateNow)->get();
+        $rawat = Covid::select(DB::raw('COALESCE(SUM(rawat),0) as rawat'))->where('tanggal',$dateNow)->get();
+        $sembuh = Covid::select(DB::raw('COALESCE(SUM(sembuh),0) as sembuh'))->where('tanggal',$dateNow)->get();
+        $meninggal = Covid::select(DB::raw('COALESCE(SUM(meninggal),0) as meninggal'))->where('tanggal',$dateNow)->get();
                 
                 
         $kabupaten = Kabupaten::all();
-        $labels = Kabupaten::select('kabupaten')->get();
+        // $labels = Kabupaten::select('kabupaten')->get();
         
         return view('index',compact('kabupaten','covids', 'tanggalSekarang','positif','rawat','sembuh','meninggal'));
         
@@ -35,11 +39,15 @@ class IndexController extends Controller
     {
     	$tanggal = $request->tanggal;
         $tanggalSekarang = Carbon::parse($request->tanggal)->format('d F Y');
-        $cekData = Covid::select('kabupaten','tb_kabupaten.id_kabupaten', 'positif','rawat','sembuh','meninggal','tanggal')
-            ->rightjoin('tb_kabupaten','tb_input.id_kabupaten','=','tb_kabupaten.id_kabupaten')
-            ->where('tanggal',$request->tanggal)
-            ->orderBy('id_kabupaten','ASC')
-            ->get();
+
+        $cekData = Covid::select('tb_input.id_input','tb_kabupaten.id_kabupaten','tb_kecamatan.id_kecamatan','tb_kelurahan.id_kelurahan','tanggal',
+        'kabupaten','kecamatan','kelurahan','sembuh','rawat','positif','meninggal','ppln','ppdn','tl','lainnya','level')
+        ->join('tb_kelurahan','tb_input.id_kelurahan','=','tb_kelurahan.id_kelurahan')
+        ->join('tb_kecamatan','tb_kelurahan.id_kecamatan','=','tb_kecamatan.id_kecamatan')
+        ->join('tb_kabupaten','tb_kecamatan.id_kabupaten','=','tb_kabupaten.id_kabupaten')
+        ->where('tanggal', $request->tanggal)->orderBy('id_kelurahan','asc')
+        ->get();
+
         if (count($cekData) == 0) {
             $covids = Kabupaten::select('kabupaten', DB::raw('IFNULL("0",0) as positif'), DB::raw('IFNULL("0",0) as rawat'),DB::raw('IFNULL("0",0) as sembuh', DB::raw('IFNULL("0",0) as meninggal')))->get();
         }else{
@@ -50,7 +58,7 @@ class IndexController extends Controller
         $sembuh = Covid::select(DB::raw('COALESCE(SUM(sembuh),0) as sembuh'))->where('tanggal',$request->tanggal)->get();
         $meninggal = Covid::select(DB::raw('COALESCE(SUM(meninggal),0) as meninggal'))->where('tanggal',$request->tanggal)->get();
         
-        return view('index',compact("covids", "positif", "rawat", "sembuh", "meninggal", "tanggalSekarang","tanggal"));
+        return view('index',compact("covids","meninggal","positif","rawat","sembuh","tanggalSekarang","tanggal"));
 
     }
 
@@ -63,10 +71,13 @@ class IndexController extends Controller
             $tanggal = $request->date;
         }
 
-        $covids = Covid::select('tb_input.id_input','tb_kabupaten.id_kabupaten','kabupaten', 'positif', 'rawat','sembuh', 'meninggal')
-                ->rightjoin('tb_kabupaten','tb_input.id_kabupaten','=','tb_kabupaten.id_kabupaten')
+        $covids = Covid::select('tb_input.id_input','tb_kabupaten.id_kabupaten','tb_kecamatan.id_kecamatan','tb_kelurahan.id_kelurahan','tanggal',
+                    'kabupaten','kecamatan','kelurahan','sembuh','rawat','positif','meninggal','ppln','ppdn','tl','lainnya','level')
+                ->join('tb_kelurahan','tb_input.id_kelurahan','=','tb_kelurahan.id_kelurahan')
+                ->join('tb_kecamatan','tb_kelurahan.id_kecamatan','=','tb_kecamatan.id_kecamatan')
+                ->join('tb_kabupaten','tb_kecamatan.id_kabupaten','=','tb_kabupaten.id_kabupaten')
                 ->where('tanggal',$tanggal)
-                ->orderBy('id_kabupaten','ASC')
+                ->orderBy('id_kelurahan','ASC')
                 ->get();
 
         return $covids;
@@ -82,17 +93,21 @@ class IndexController extends Controller
             $tanggal = $request->date;
         }
 
-        $pos = Covid::select('tb_input.id_input','tb_kabupaten.id_kabupaten','kabupaten', 'positif', 'rawat','sembuh','meninggal')
-                ->rightjoin('tb_kabupaten','tb_input.id_kabupaten','=','tb_kabupaten.id_kabupaten')
+        $pos = Covid::select('tb_input.id_input','tb_kabupaten.id_kabupaten','tb_kecamatan.id_kecamatan','tb_kelurahan.id_kelurahan','tanggal',
+                    'kabupaten','kecamatan','kelurahan','sembuh','rawat','positif','meninggal','ppln','ppdn','tl','lainnya','level')
+                ->join('tb_kelurahan','tb_input.id_kelurahan','=','tb_kelurahan.id_kelurahan')
+                ->join('tb_kecamatan','tb_kelurahan.id_kecamatan','=','tb_kecamatan.id_kecamatan')
+                ->join('tb_kabupaten','tb_kecamatan.id_kabupaten','=','tb_kabupaten.id_kabupaten')
                 ->where('tanggal',$tanggal)
-                ->orderBy('positif','DESC')
+                ->orderBy('level','DESC')
                 ->get();
         return $pos;
     }
 
-    public function createPallete(Request $request)
+    public function createPallette(Request $request)
     {
-    	$HexFrom = ltrim($request->start, '#');
+
+        $HexFrom = ltrim($request->start, '#');
         $HexTo = ltrim($request->end, '#');
 
     
