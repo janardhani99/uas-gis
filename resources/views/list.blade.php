@@ -27,39 +27,56 @@
 	</nav>
  	
  	<main class="content-wrapper">
+    </br>
         <div class="table-wrapper">
         <br/>
-        <h2 align="center"> Data Kasus Covid-19 di {{$covids[0]['kabupaten']}} </h2>
+        <h2 align="center"> Data Kasus Covid-19 di {{$covids[0]['kelurahan']}} </h2>
+        </br>
         	<table class="table">
         		<thead>
-        			<tr>
-						<th>No</th>
-						<th>Tanggal</th>
-						<th>Positif</th>
-						<th>Dalam Perawatan</th>
-						<th>Sembuh</th>
-						<th>Meninggal</th>
-						<th>Edit</th>
-						<th>Delete</th>
-				</thead>
+                    <tr>
+                        <th rowspan="2">No</th>
+                        <th rowspan="2">Kabupaten</th>
+                        <th rowspan="2">Kecamatan</th>
+                        <th rowspan="2">Level</th>
+                        <th colspan="4">Penyebaran</th>
+                        <th colspan="4">Kondisi</th>
+                        <th rowspan="2">Detail</th>
+                    </tr>
+                    <tr>
+                        <th>PP-LN</th>
+                        <th>PP-DN</th>
+                        <th>TL</th>
+                        <th>Lainnya</th>
+                        <th>Positif</th>
+                        <th>Dirawat</th>
+                        <th>Sembuh</th>
+                        <th>Meninggal</th>
+                        
+                    </tr>
+                </thead>
 
         		<tbody>
                     @foreach ($covids as $covid)
                         <tr>
                             <th scope="row">{{ $loop->iteration }}</th>
-                            <td>{{ $covid->tanggal }}</td>
+                            <td>{{ $covid->kabupaten }}</td>
+                            <td>{{ $covid->kecamatan }}</td>
+                            <td>{{ $covid->level }}</td>
+                            <td>{{ $covid->ppln }}</td>
+                            <td>{{ $covid->ppdn }}</td>
+                            <td>{{ $covid->tl }}</td>
+                            <td>{{ $covid->lainnya }}</td>
                             <td>{{ $covid->positif }}</td>
                             <td>{{ $covid->rawat }}</td>
                             <td>{{ $covid->sembuh }}</td>
                             <td>{{ $covid->meninggal }}</td>
-                            <td>
+                            <th colspan="2">
                                 <form action="/covid-19/{{$covid->id_input}}/edit" method="GET">
                                     <button type="submit">
                                         <i class="fa fa-edit"></i>
                                     </button>
                                 </form>
-                            </td>
-                            <td>
                                 <form action="/covid-19/{{$covid->id_input}}" method="POST">
                                     @csrf
                                     @method("DELETE")
@@ -67,7 +84,10 @@
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </form>
-                            </td>
+                            </th>
+                            <!-- <td>
+                                
+                            </td> -->
                         </tr>
                     @endforeach
                 </tbody>
