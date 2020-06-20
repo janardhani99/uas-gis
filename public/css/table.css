@@ -20,9 +20,9 @@
     opacity: 0.9;
     box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.75);
     min-height: 556px;
-/*     max-height: 656px; */
+    max-height: 656px;
     max-width: 1068px;
-/*     overflow: scroll; */
+    overflow: scroll;
     border-radius: 3px;
 }
 
@@ -33,7 +33,7 @@
     cursor: default;
     border-collapse: collapse;
     border: 1px solid #f2f5f7;
-/*     overflow: scroll; */
+    overflow: scroll;
 }
 
 .table thead th {
