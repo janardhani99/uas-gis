@@ -33,6 +33,7 @@
     cursor: default;
     border-collapse: collapse;
     border: 1px solid #f2f5f7;
+    overflow: scroll;
 }
 
 .table thead th {
